@@ -36,7 +36,7 @@ const handleSearch = () => {
 
 <style lang="scss" scoped>
 main {
-  background-color: #000;
+  background-color: #f3f4f6;
   background-image: url('../assets/images/Carousel.webp');
   height: calc(100vh - 80px);
   background-size: cover;
