@@ -25,16 +25,21 @@
       </div>
       <div class="results" v-else>
         <div class="left">
-          <router-link to="/" class="pharma" v-for="(pharma, i) in pharmas" :key="i">
+          <div
+            class="pharma"
+            v-for="(pharma, i) in pharmas"
+            :key="i"
+            @click.prevent="selectPharmacy(pharma)"
+          >
             <div class="icon"></div>
             <div class="infos">
               <h2>{{ pharma.nom }}</h2>
               <p>{{ pharma.localisation }}</p>
             </div>
-          </router-link>
+          </div>
         </div>
         <div class="right">
-          <GoogleMap></GoogleMap>
+          <OpenStreetMap :selectedPharmacy="selectedPharmacy" />
         </div>
       </div>
     </div>
@@ -51,44 +56,60 @@ const route = useRoute()
 import { ref } from 'vue'
 import FooterPage from '@/components/FooterPage.vue'
 import NoResultIcon from '@/components/icons/noResultIcon.vue'
-import GoogleMap from '@/components/GoogleMap.vue'
+import OpenStreetMap from '@/components/OpenStreetMap.vue'
 
 const search = ref(null)
 
 const pharmas = [
   {
+    nom: 'Pharmacie Les Arums',
+    localisation: '8e Tranche, Abidjan',
+    coordinates: { lat: 5.3955834, lng: -3.9770936 }
+  },
+  {
     nom: 'Pharmacie du Plateau',
-    localisation: 'Rue du Commerce, Plateau, Abidjan'
+    localisation: 'Rue du Commerce, Plateau, Abidjan',
+    coordinates: { lat: 5.316416263580322, lng: -4.015980243682861 }
   },
   {
     nom: 'Pharmacie des Lagunes',
-    localisation: 'Boulevard Lagunaire, Cocody, Abidjan'
+    localisation: 'Boulevard Lagunaire, Cocody, Abidjan',
+    coordinates: { lat: 5.3072654, lng: -3.994634 }
   },
   {
-    nom: 'Pharmacie St Michel',
-    localisation: 'Avenue 12 Rue 23, Marcory, Abidjan'
-  },
-  {
-    nom: 'Pharmacie de l’Aéroport',
-    localisation: 'Boulevard de l’Aéroport, Port-Bouet, Abidjan'
+    nom: 'Pharmacie Laoulo',
+    localisation: 'Rue des Jardins, Cocody, Abidjan',
+    coordinates: { lat: 5.3332213, lng: -4.0625749 }
   },
   {
     nom: 'Pharmacie de la Riviera 2',
-    localisation: 'Rue des Jardins, Riviera 2, Cocody, Abidjan'
+    localisation: 'Rue des Jardins, Riviera 2, Cocody, Abidjan',
+    coordinates: { lat: 5.3531145, lng: -3.9767253 }
   },
   {
     nom: 'Pharmacie Sainte Rita',
-    localisation: 'Rue du Lycée Technique, Adjamé, Abidjan'
+    localisation: 'Rue du Lycée Technique, Adjamé, Abidjan',
+    coordinates: { lat: 5.3558006, lng: -4.0661068 }
   },
   {
     nom: 'Pharmacie des Deux Plateaux',
-    localisation: 'Rue des Jardins, 7ème Tranche, Abidjan'
+    localisation: 'Rue des Jardins, 7ème Tranche, Abidjan',
+    coordinates: { lat: 5.3705136, lng: -3.9979318 }
   },
   {
     nom: 'Pharmacie de Cocody Danga',
-    localisation: 'Boulevard Latrille, Cocody, Abidjan'
+    localisation: 'Boulevard Latrille, Cocody, Abidjan',
+    coordinates: { lat: 5.3369119, lng: -4.0000882 }
   }
 ]
+
+const selectedPharmacy = ref(null)
+
+// Méthode pour sélectionner une pharmacie
+const selectPharmacy = (pharma) => {
+  console.log(pharma)
+  selectedPharmacy.value = pharma
+}
 
 onMounted(() => {
   if (route.query && route.query.search) {
@@ -194,6 +215,7 @@ form {
     // overflow-y: auto;
 
     .pharma {
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 16px;
@@ -238,9 +260,6 @@ form {
     top: 100px;
     width: 60%;
     // height: 500px;
-    // background-image: url('../assets/images/Map.png');
-    // background-size: cover;
-    // background-position: center;
   }
 }
 </style>
