@@ -94,6 +94,6 @@ watch(
 <style scoped>
 .map-container {
   width: 100%;
-  height: 100vh; /* Prend toute la hauteur de la fenêtre */
+  height: 500px;
 }
 </style>

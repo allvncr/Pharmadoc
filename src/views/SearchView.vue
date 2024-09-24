@@ -211,8 +211,8 @@ form {
 
   .left {
     width: 30%;
-    // height: 500px;
-    // overflow-y: auto;
+    height: 500px;
+    overflow-y: auto;
 
     .pharma {
       cursor: pointer;
@@ -259,7 +259,6 @@ form {
     position: sticky;
     top: 100px;
     width: 60%;
-    // height: 500px;
   }
 }
 </style>
