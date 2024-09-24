@@ -20,6 +20,19 @@ const router = createRouter({
       name: "Centre d'aide",
       meta: { title: "Centre d'aide" },
       component: () => import('../views/HelpView.vue')
+    },
+    {
+      path: '/pharmacie-garde',
+      name: 'Pharmacie de Garde',
+      meta: { title: 'Pharmacie de Garde' },
+      component: () => import('../views/PharmaGarde.vue')
+    },
+    {
+      path: '/:catchAll(.*)',
+      name: 'Not Found',
+      redirect: () => {
+        return { path: '/' }
+      }
     }
   ]
 })

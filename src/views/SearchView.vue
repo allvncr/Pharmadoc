@@ -121,7 +121,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .container {
-  padding: 40px 0;
+  padding-top: 40px;
+  padding-bottom: 40px;
   min-height: calc(100vh - 80px);
 }
 
@@ -170,6 +171,9 @@ form {
   }
 
   button {
+    @media (max-width: $phone) {
+      width: 100%;
+    }
     cursor: pointer;
     background-color: $blue;
     color: #fff;
@@ -204,12 +208,19 @@ form {
 }
 
 .results {
+  @media (max-width: $tablette) {
+    flex-direction: column-reverse;
+    gap: 32px;
+  }
   position: relative;
   padding: 48px 0;
   display: flex;
   gap: 16px;
 
   .left {
+    @media (max-width: $tablette) {
+      width: 100%;
+    }
     width: 30%;
     height: 500px;
     overflow-y: auto;
@@ -256,9 +267,11 @@ form {
     }
   }
   .right {
-    position: sticky;
-    top: 100px;
+    @media (max-width: $tablette) {
+      width: 100%;
+    }
     width: 60%;
+    z-index: 0;
   }
 }
 </style>

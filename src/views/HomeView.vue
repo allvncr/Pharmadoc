@@ -91,6 +91,9 @@ form {
   }
 
   button {
+    @media (max-width: $phone) {
+      width: 100%;
+    }
     cursor: pointer;
     background-color: $blue;
     color: #fff;
