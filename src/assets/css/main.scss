@@ -1,0 +1,59 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+
+  @media (max-width: 576px) {
+    font-size: 14px;
+  }
+}
+// f3f4f6
+body {
+  background-color: #fff;
+  color: #000;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.logo {
+  font-family: 'Secular One', sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+
+  // Breakpoints responsive
+  @media (min-width: 576px) {
+    max-width: 540px;
+  }
+
+  @media (min-width: 768px) {
+    max-width: 720px;
+  }
+
+  @media (min-width: 992px) {
+    max-width: 960px;
+  }
+
+  @media (min-width: 1200px) {
+    max-width: 1140px;
+  }
+
+  @media (min-width: 1400px) {
+    max-width: 1320px;
+  }
+}
