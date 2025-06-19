@@ -1,6 +1,8 @@
 <template>
-  <HeaderPage></HeaderPage>
-  <RouterView />
+  <div id="app">
+    <HeaderPage />
+    <RouterView />
+  </div>
 </template>
 
 <script setup>

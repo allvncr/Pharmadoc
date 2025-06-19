@@ -7,10 +7,118 @@
 
     <div class="right">
       <router-link to="/help">Besoin d'aide ?</router-link>
-      <router-link to="/pharmacie-garde" class="btn-link">Pharmacie de garde</router-link>
+      <a class="btn-link" @click="showLoginPopup = true" v-if="!authStore.token">Se connecter</a>
+      <a class="btn-link logout" @click="authStore.logout" v-else>Se deconnecter</a>
+    </div>
+
+    <!-- Popup -->
+    <div v-if="showLoginPopup" class="popup-overlay" @click.self="showLoginPopup = false">
+      <div class="popup">
+        <div class="login-container">
+          <div class="logo">Pharmadoc</div>
+          <p class="subtitle">Connectez-vous avec votre email & mot de passe</p>
+
+          <form class="login-form" @submit.prevent="handleLogin">
+            <label>Email</label>
+            <input type="email" v-model="email" required />
+
+            <div class="password-label">
+              <label>Mot de passe</label>
+              <a href="#"> Mot de passe oublié ?</a>
+            </div>
+            <input :type="showPassword ? 'text' : 'password'" v-model="password" required />
+
+            <button type="submit" class="login-button">Se connecter</button>
+          </form>
+
+          <div class="divider"><span>Ou</span></div>
+
+          <button class="social-button google">Connexion avec Google</button>
+
+          <p class="register-text" @click="(showLoginPopup = false), (showRegisterPopup = true)">
+            Vous n'avez pas de compte ? <a href="#">S'inscrire</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showRegisterPopup" class="popup-overlay" @click.self="showRegisterPopup = false">
+      <div class="popup">
+        <div class="login-container">
+          <div class="logo">Pharmadoc</div>
+          <p class="subtitle">
+            En vous inscrivant, vous acceptez nos conditions générales et notre politique.
+          </p>
+
+          <form class="login-form" @submit.prevent="handleRegister">
+            <label>Nom</label>
+            <input v-model="lastName" required />
+
+            <label>Prénom</label>
+            <input v-model="firstName" required />
+
+            <label>Email</label>
+            <input type="email" v-model="email" required />
+
+            <label>Mot de passe</label>
+            <input :type="showPassword ? 'text' : 'password'" v-model="password" required />
+
+            <button type="submit" class="login-button">S'inscrire</button>
+          </form>
+
+          <div class="divider"><span>Ou</span></div>
+
+          <button class="social-button google">S'inscrire avec Google</button>
+
+          <p class="register-text" @click="(showRegisterPopup = false), (showLoginPopup = true)">
+            Vous avez déjà un compte ? <a href="#">Se connecter</a>
+          </p>
+        </div>
+      </div>
     </div>
   </header>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
+
+const showLoginPopup = ref(false)
+const showRegisterPopup = ref(false)
+const firstName = ref('')
+const lastName = ref('')
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+
+// Gérer la connexion
+const handleLogin = async () => {
+  try {
+    await authStore.login(email.value, password.value)
+    showLoginPopup.value = false
+  } catch (error) {
+    alert(error)
+  }
+}
+
+// Gérer l'inscription
+const handleRegister = async () => {
+  try {
+    await authStore.register({
+      firstname: firstName.value,
+      lastname: lastName.value,
+      email: email.value,
+      password: password.value
+    })
+    showRegisterPopup.value = false
+    showLoginPopup.value = true
+  } catch (error) {
+    alert(error)
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 header {
@@ -33,9 +141,9 @@ header {
 
   .logo {
     @media (max-width: $phone) {
-      font-size: 18px;
+      font-size: 16px;
       img {
-        width: 36px;
+        width: 24px;
       }
     }
     display: flex;
@@ -44,7 +152,10 @@ header {
     color: $blue;
     font-weight: 300;
     text-transform: uppercase;
-    font-size: 24px;
+    font-size: 18px;
+    img {
+      width: 48px;
+    }
   }
 
   .right {
@@ -65,6 +176,7 @@ header {
       @media (max-width: $phone) {
         display: block;
       }
+      cursor: pointer;
       margin-left: 24px;
       background-color: $blue;
       color: #fff !important;
@@ -76,6 +188,180 @@ header {
       &:hover {
         background-color: $blue-hover;
       }
+
+      &.logout {
+        background-color: #f44336;
+        color: #fff;
+
+        &:hover {
+          background-color: #d32f2f;
+        }
+      }
+    }
+  }
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  .popup {
+    @media (max-width: $phone) {
+      max-width: none;
+    }
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .logo {
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    & button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: $blue;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $blue-hover;
+      }
+    }
+  }
+}
+
+.login-container {
+  margin: auto;
+  background: #fff;
+  border-radius: 8px;
+  text-align: center;
+
+  .logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 14px;
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    label {
+      text-align: left;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input {
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+
+      &:active,
+      &:focus {
+        outline: 1px solid $blue;
+      }
+    }
+
+    .password-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+
+      a {
+        font-size: 0.85rem;
+        color: $blue;
+        text-decoration: none;
+      }
+    }
+
+    .login-button {
+      background-color: $blue;
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+
+      &:hover {
+        background-color: $blue-hover;
+      }
+    }
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+
+    span {
+      background: #fff;
+      padding: 0 1rem;
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #ddd;
+    }
+  }
+
+  .social-button {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    border: none;
+    cursor: pointer;
+
+    &.google {
+      background-color: #db4437 !important;
+      color: white;
+    }
+  }
+
+  .register-text {
+    font-size: 0.9rem;
+    color: #444;
+    margin-top: 1rem;
+
+    a {
+      color: $blue;
+      font-weight: 600;
+      text-decoration: underline;
     }
   }
 }
