@@ -9,7 +9,12 @@
               <h3>Numéro de téléphone</h3>
               <!-- <button class="section-action">+ Modifier</button> -->
             </div>
-            <input v-model="contact" type="text" class="section-input" />
+            <input
+              v-model="contact"
+              type="text"
+              placeholder="+225 07 45 12 34 56"
+              class="section-input"
+            />
           </section>
 
           <section class="checkout-section">
@@ -18,7 +23,12 @@
               <h3>Adresse de livraison</h3>
               <!-- <button class="section-action">+ Ajouter</button> -->
             </div>
-            <textarea v-model="shippingAddress" class="section-textarea" rows="2"></textarea>
+            <textarea
+              placeholder="Cocody Angré, Abidjan, Côte d’Ivoire"
+              v-model="shippingAddress"
+              class="section-textarea"
+              rows="2"
+            ></textarea>
           </section>
           <section class="checkout-section">
             <div class="section-header">
@@ -39,7 +49,7 @@
           <ul class="order-list">
             <li v-for="item in useCart.items" :key="item.id">
               <span>{{ item.quantity }} × {{ item.name }}</span>
-              <span>{{ (item.price * item.quantity).toLocaleString('fr-CI') }} FCFA</span>
+              <span>{{ (item.newPrice * item.quantity).toLocaleString('fr-CI') }} FCFA</span>
             </li>
           </ul>
           <div class="order-summary">
@@ -59,8 +69,8 @@
 <script setup>
 import { ref } from 'vue'
 
-const contact = ref('+225 07 45 12 34 56')
-const shippingAddress = 'Cocody Angré, Abidjan, Côte d’Ivoire'
+const contact = ref('')
+const shippingAddress = ''
 const orderNote = ref('')
 import { useCartStore } from '../stores/cart'
 
