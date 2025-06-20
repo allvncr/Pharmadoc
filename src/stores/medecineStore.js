@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
 import { getMedecines, getMedecineById, getCategories } from '@/services/medecineService'
+import Medecine from '@/models/medecine'
 
 export const useMedecineStore = defineStore('medecine', {
   state: () => ({
     medecines: [],
     medecine: null,
     categories: [],
+    totalPages: 1,
+    totalElements: 0,
     loading: false,
     error: null
   }),
@@ -16,7 +19,9 @@ export const useMedecineStore = defineStore('medecine', {
       this.error = null
       try {
         const { data } = await getMedecines(searchQuery)
-        this.medecines = data.content || []
+        this.medecines = data.content.map((med) => Medecine.create(med)) || []
+        this.totalPages = data.totalPages || 1
+        this.totalElements = data.totalElements || 0
       } catch (err) {
         this.error =
           err.response?.data?.message || 'Erreur lors de la récupération des médicaments.'
@@ -43,7 +48,7 @@ export const useMedecineStore = defineStore('medecine', {
       this.error = null
       try {
         const { data } = await getMedecineById(id)
-        this.medecine = data || null
+        this.medecine = Medecine.create(data) || null
       } catch (err) {
         this.error = err.response?.data?.message || 'Erreur lors de la récupération du médicament.'
       } finally {

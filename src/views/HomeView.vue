@@ -36,14 +36,22 @@
     <div class="shop-container">
       <aside class="sidebar">
         <ul>
-          <li v-for="category in medecineStore.categories" :key="category.id">
+          <li @click="handleCategory(null)" :class="{ active: !selectedCategoryId }">
+            <span>Tous</span>
+          </li>
+          <li
+            v-for="category in medecineStore.categories"
+            :key="category.id"
+            @click="handleCategory(category.id)"
+            :class="{ active: selectedCategoryId === category.id }"
+          >
             <span>{{ category.name }}</span>
           </li>
         </ul>
       </aside>
 
       <section class="product-grid">
-        <template v-if="medecineStore.medecines">
+        <template v-if="medecineStore.medecines.length">
           <div class="product-card" v-for="product in medecineStore.medecines" :key="product.id">
             <div class="image-container" @click="openProduct(product.id)">
               <img :src="product.url" :alt="product.name" />
@@ -63,6 +71,23 @@
                 <button class="add-btn" @click="useCart.addItem(product)">+</button>
               </div>
             </div>
+          </div>
+          <div class="pagination" v-if="medecineStore.totalPages > 1">
+            <button :disabled="page === 0" @click="() => changePage(page - 1)">Précédent</button>
+            <button
+              v-for="p in medecineStore.totalPages"
+              :key="p"
+              :class="{ active: page === p - 1 }"
+              @click="() => changePage(p - 1)"
+            >
+              {{ p }}
+            </button>
+            <button
+              :disabled="page === medecineStore.totalPages - 1"
+              @click="() => changePage(page + 1)"
+            >
+              Suivant
+            </button>
           </div>
         </template>
         <template v-else>
@@ -252,10 +277,13 @@ const selectedProduct = ref({})
 const search = ref('')
 const useCart = useCartStore()
 const medecineStore = useMedecineStore()
+const page = ref(0)
+const size = ref(8)
+const selectedCategoryId = ref(null)
 
 // Charge les médicaments au montage
 onMounted(() => {
-  medecineStore.all_medecines({ page: 0, size: 8 })
+  medecineStore.all_medecines({ page: page.value, size: size.value })
   medecineStore.all_categories()
 })
 
@@ -294,19 +322,30 @@ const closePopup = () => {
   selectedProduct.value = {}
 }
 
-const handleSearch = () => {
-  // filteredProducts.value = products.filter((product) =>
-  //   product.name.toLowerCase().includes(search.value.toLowerCase())
-  // )
+const handleCategory = (ID) => {
+  search.value = ''
+  selectedCategoryId.value = ID
+  medecineStore.all_medecines({ page: 0, size: size.value, name: search.value, categoryId: ID })
+}
 
-  // if (filteredProducts.value.length < 0) {
-  //   filteredProducts.value = [...products]
-  // }
+const handleSearch = () => {
+  medecineStore.all_medecines({ page: 0, size: size.value, name: search.value })
 
   const shopContainer = document.querySelector('.shop-container')
   if (shopContainer) {
     shopContainer.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+const changePage = (newPage) => {
+  if (newPage < 0 || newPage >= medecineStore.totalPages) return
+  page.value = newPage
+  medecineStore.all_medecines({
+    page: page.value,
+    size: size.value,
+    name: search.value,
+    categoryId: selectedCategoryId.value
+  })
 }
 </script>
 
@@ -474,7 +513,8 @@ const handleSearch = () => {
           font-size: 14px;
         }
 
-        &:hover {
+        &:hover,
+        &.active {
           color: $blue-hover;
         }
       }
@@ -515,6 +555,7 @@ const handleSearch = () => {
         img {
           width: 100%;
           object-fit: contain;
+          aspect-ratio: 1 / 1;
         }
 
         .badge {
@@ -710,6 +751,47 @@ const handleSearch = () => {
         font-size: 14px;
         margin-left: 5px;
       }
+    }
+  }
+}
+
+.pagination {
+  grid-column: span 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    background: #fff;
+    border: 1px solid $blue;
+    color: $blue;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      color 0.2s;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f3f4f6;
+      color: #aaa;
+      border-color: #eee;
+    }
+
+    &.active {
+      background: $blue;
+      color: #fff;
+      font-weight: bold;
+      border-color: $blue;
+    }
+
+    &:hover:not(:disabled):not(.active) {
+      background: $blue-hover;
+      color: #fff;
     }
   }
 }

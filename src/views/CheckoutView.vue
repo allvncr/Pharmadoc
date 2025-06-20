@@ -1,7 +1,7 @@
 <template>
   <main>
     <div class="container">
-      <div class="checkout-container">
+      <form @submit.prevent="handleOrder" class="checkout-container">
         <div class="checkout-left">
           <section class="checkout-section">
             <div class="section-header">
@@ -10,9 +10,10 @@
               <!-- <button class="section-action">+ Modifier</button> -->
             </div>
             <input
-              v-model="contact"
-              type="text"
-              placeholder="+225 07 45 12 34 56"
+              type="tel"
+              v-model="phoneNumber"
+              placeholder="+225"
+              required
               class="section-input"
             />
           </section>
@@ -24,8 +25,9 @@
               <!-- <button class="section-action">+ Ajouter</button> -->
             </div>
             <textarea
-              placeholder="Cocody Angré, Abidjan, Côte d’Ivoire"
-              v-model="shippingAddress"
+              placeholder="Cocody Angré, Abidjan"
+              v-model="address"
+              required
               class="section-textarea"
               rows="2"
             ></textarea>
@@ -36,7 +38,7 @@
               <h3>Note de commande</h3>
             </div>
             <textarea
-              v-model="orderNote"
+              v-model="comment"
               class="section-textarea"
               rows="4"
               placeholder="Ex. Laisser à la loge, appeler avant livraison, etc."
@@ -59,22 +61,48 @@
             </div>
             <div><span>Livraison</span><span>À calculer</span></div>
           </div>
-          <button class="checkout-button">Valider la commande</button>
+          <button type="submit" class="checkout-button">Valider la commande</button>
         </div>
-      </div>
+      </form>
     </div>
   </main>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const contact = ref('')
-const shippingAddress = ''
-const orderNote = ref('')
+const router = useRouter()
 import { useCartStore } from '../stores/cart'
+import { useAuthStore } from '@/stores/authStore'
+import { useOrderStore } from '@/stores/orderStore'
+
+const phoneNumber = ref('0711935630')
+const address = ref('YOP')
+const comment = ref('Aucun')
 
 const useCart = useCartStore()
+const authStore = useAuthStore()
+const orderStore = useOrderStore()
+
+const handleOrder = () => {
+  const orderDetails = {
+    orderLines: useCart.items.map((item) => ({
+      medicineId: item.id,
+      quantity: item.quantity
+    })),
+    order: {
+      userId: authStore.user.id || 1,
+      address: address.value,
+      phoneNumber: phoneNumber.value
+    }
+  }
+
+  orderStore.create_order(orderDetails).then(() => {
+    useCart.clearCart()
+    router.push('/')
+  })
+}
 </script>
 
 <style lang="scss" scoped>

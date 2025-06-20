@@ -31,9 +31,9 @@
             <button type="submit" class="login-button">Se connecter</button>
           </form>
 
-          <div class="divider"><span>Ou</span></div>
+          <!-- <div class="divider"><span>Ou</span></div>
 
-          <button class="social-button google">Connexion avec Google</button>
+          <button class="social-button google">Connexion avec Google</button> -->
 
           <p class="register-text" @click="(showLoginPopup = false), (showRegisterPopup = true)">
             Vous n'avez pas de compte ? <a href="#">S'inscrire</a>
@@ -66,9 +66,9 @@
             <button type="submit" class="login-button">S'inscrire</button>
           </form>
 
-          <div class="divider"><span>Ou</span></div>
+          <!-- <div class="divider"><span>Ou</span></div>
 
-          <button class="social-button google">S'inscrire avec Google</button>
+          <button class="social-button google">S'inscrire avec Google</button> -->
 
           <p class="register-text" @click="(showRegisterPopup = false), (showLoginPopup = true)">
             Vous avez déjà un compte ? <a href="#">Se connecter</a>
