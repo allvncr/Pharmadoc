@@ -92,13 +92,14 @@ const handleOrder = () => {
       quantity: item.quantity
     })),
     order: {
-      userId: authStore.user.id || 1,
+      userId: authStore.user.id,
       address: address.value,
       phoneNumber: phoneNumber.value
     }
   }
 
   orderStore.create_order(orderDetails).then(() => {
+    alert('Commande validée avec succès !')
     useCart.clearCart()
     router.push('/')
   })
