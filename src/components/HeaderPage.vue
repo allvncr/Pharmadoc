@@ -7,12 +7,18 @@
 
     <div class="right">
       <router-link to="/help">Besoin d'aide ?</router-link>
-      <a class="btn-link" @click="showLoginPopup = true" v-if="!authStore.token">Se connecter</a>
+      <a class="btn-link" @click="authStore.showLoginPopup = true" v-if="!authStore.token"
+        >Se connecter</a
+      >
       <a class="btn-link logout" @click="authStore.logout" v-else>Se deconnecter</a>
     </div>
 
     <!-- Popup -->
-    <div v-if="showLoginPopup" class="popup-overlay" @click.self="showLoginPopup = false">
+    <div
+      v-if="authStore.showLoginPopup"
+      class="popup-overlay"
+      @click.self="authStore.showLoginPopup = false"
+    >
       <div class="popup">
         <div class="login-container">
           <div class="logo">Pharmadoc</div>
@@ -35,7 +41,10 @@
 
           <button class="social-button google">Connexion avec Google</button> -->
 
-          <p class="register-text" @click="(showLoginPopup = false), (showRegisterPopup = true)">
+          <p
+            class="register-text"
+            @click="(authStore.showLoginPopup = false), (showRegisterPopup = true)"
+          >
             Vous n'avez pas de compte ? <a href="#">S'inscrire</a>
           </p>
         </div>
@@ -70,7 +79,10 @@
 
           <button class="social-button google">S'inscrire avec Google</button> -->
 
-          <p class="register-text" @click="(showRegisterPopup = false), (showLoginPopup = true)">
+          <p
+            class="register-text"
+            @click="(showRegisterPopup = false), (authStore.showLoginPopup = true)"
+          >
             Vous avez déjà un compte ? <a href="#">Se connecter</a>
           </p>
         </div>
@@ -85,7 +97,6 @@ import { useAuthStore } from '@/stores/authStore'
 
 const authStore = useAuthStore()
 
-const showLoginPopup = ref(false)
 const showRegisterPopup = ref(false)
 const firstName = ref('')
 const lastName = ref('')
@@ -97,7 +108,7 @@ const showPassword = ref(false)
 const handleLogin = async () => {
   try {
     await authStore.login(email.value, password.value)
-    showLoginPopup.value = false
+    authStore.showLoginPopup = false
   } catch (error) {
     alert(error)
   }
@@ -113,7 +124,7 @@ const handleRegister = async () => {
       password: password.value
     })
     showRegisterPopup.value = false
-    showLoginPopup.value = true
+    authStore.showLoginPopup = true
   } catch (error) {
     alert(error)
   }

@@ -4,16 +4,29 @@
     <section class="hero">
       <div class="container">
         <h1>Trouvez vos médicaments en un clic</h1>
-        <p>Recherchez un médicament et trouvez les pharmacies les plus proches rapidement</p>
+        <p>Recevez vos médicaments à domicile toute la journée, tous les jours</p>
 
         <form @submit.prevent="handleSearch">
-          <input
-            type="search"
-            name="search"
-            id="search"
-            placeholder="Entrez le nom d’un médicament..."
-            v-model="search"
-          />
+          <div class="search-wrapper">
+            <input
+              type="search"
+              name="search"
+              id="search"
+              placeholder="Entrez le nom d’un médicament..."
+              v-model="search"
+              @input="debouncedSearch"
+            />
+            <span v-if="medecineStore.loading" class="loader-spinner"></span>
+            <ul
+              v-if="search && medecineStore.medecines.length && !medecineStore.loading"
+              class="search-dropdown"
+            >
+              <li v-for="med in medecineStore.medecines" :key="med.id" @click="openProduct(med.id)">
+                <img :src="med.url" :alt="med.name" />
+                {{ med.name }}
+              </li>
+            </ul>
+          </div>
           <button type="submit" for="search">
             <SearchIcon></SearchIcon>
             Rechercher
@@ -40,14 +53,18 @@
             <span>Tous</span>
           </li>
           <li
-            v-for="category in medecineStore.categories"
-            :key="category.id"
+            v-for="(category, i) in displayedCategories"
+            :key="i"
             @click="handleCategory(category.id)"
             :class="{ active: selectedCategoryId === category.id }"
           >
             <span>{{ category.name }}</span>
           </li>
         </ul>
+
+        <button class="toggle-btn" @click="showAllCategories = !showAllCategories">
+          {{ showAllCategories ? 'Afficher moins' : 'Afficher plus' }}
+        </button>
       </aside>
 
       <section class="product-grid">
@@ -225,10 +242,16 @@
       </section>
     </div>
 
-    <!-- Ajoutez ce code à la fin de votre template -->
     <div v-if="isPopupOpen" class="popup-overlay" @click.self="closePopup">
       <div class="popup-content">
-        <div class="product-detail">
+        <button class="close-btn" @click="closePopup" aria-label="Fermer le popup">&times;</button>
+        <!-- Affichage du loader -->
+        <div v-if="medecineStore.loading || !medecineStore.medecine" class="loader-wrapper">
+          <span class="popup-loader"></span>
+        </div>
+
+        <!-- Affichage du produit -->
+        <div v-else class="product-detail">
           <div class="product-image">
             <div class="discount" v-if="selectedProduct.oldPrice && selectedProduct.newPrice">
               {{ Math.round(100 - (selectedProduct.newPrice / selectedProduct.oldPrice) * 100) }}%
@@ -248,9 +271,9 @@
 
             <div class="price">
               <strong>{{ selectedProduct.newPrice.toLocaleString('fr-CI') }} FCFA</strong>
-              <del v-if="selectedProduct.oldPrice"
-                >{{ selectedProduct.oldPrice.toLocaleString('fr-CI') }} FCFA</del
-              >
+              <del v-if="selectedProduct.oldPrice">
+                {{ selectedProduct.oldPrice.toLocaleString('fr-CI') }} FCFA
+              </del>
             </div>
 
             <p>{{ selectedProduct.smallDescription }}</p>
@@ -259,6 +282,13 @@
               Ajouter au panier
             </button>
           </div>
+          <div class="product-description">
+            <h2>Description</h2>
+            <p v-if="selectedProduct.completeDescription">
+              {{ selectedProduct.completeDescription }}
+            </p>
+            <p v-else>Aucune description disponible pour ce produit.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -266,7 +296,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import debounce from 'lodash/debounce'
 import { useCartStore } from '../stores/cart'
 import { useMedecineStore } from '@/stores/medecineStore'
 import CartComponent from '../components/CartComponent.vue'
@@ -280,6 +311,15 @@ const medecineStore = useMedecineStore()
 const page = ref(0)
 const size = ref(8)
 const selectedCategoryId = ref(null)
+const showAllCategories = ref(false)
+
+const displayedCategories = computed(() => {
+  return showAllCategories.value ? medecineStore.categories : medecineStore.categories.slice(0, 6)
+})
+
+const debouncedSearch = debounce(() => {
+  medecineStore.all_medecines({ page: 0, size: size.value, name: search.value })
+}, 300)
 
 // Charge les médicaments au montage
 onMounted(() => {
@@ -380,27 +420,55 @@ const changePage = (newPage) => {
       display: block;
       margin-top: 4.5rem;
     }
+    position: relative;
     margin-top: 7.5rem;
     display: flex;
+    align-items: center;
     justify-content: center;
 
-    input {
-      width: 100%;
-      max-width: 624px;
-      height: 56px;
-      border-radius: 5px 0 0 5px;
-      outline: none;
-      border: 1px solid #fff;
-      padding: 0 24px;
-      box-shadow: 0 21px 36px rgba($color: #000, $alpha: 0.1);
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
 
-      &:active,
-      &:focus {
-        border-color: $blue;
+      input {
+        width: 100%;
+        min-width: 624px;
+        height: 56px;
+        border-radius: 5px 0 0 5px;
+        outline: none;
+        border: 1px solid #fff;
+        padding: 0 2rem 0 24px;
+        box-shadow: 0 21px 36px rgba($color: #000, $alpha: 0.1);
+
+        &:active,
+        &:focus {
+          border-color: $blue;
+        }
+
+        &::placeholder {
+          color: #707070;
+        }
       }
 
-      &::placeholder {
-        color: #707070;
+      .loader-spinner {
+        position: absolute;
+        right: 12px;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ccc;
+        border-top: 2px solid $blue;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     }
 
@@ -423,6 +491,40 @@ const changePage = (newPage) => {
 
       &:hover {
         background-color: $blue-hover;
+      }
+    }
+
+    .search-dropdown {
+      position: absolute;
+      left: 0;
+      top: 100%;
+      background: #fff;
+      list-style: none;
+      padding: 0;
+      margin: 4px 0;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      z-index: 10;
+
+      li {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        cursor: pointer;
+        gap: 8px;
+
+        img {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+        }
+
+        &:hover {
+          background: #f5f5f5;
+        }
       }
     }
   }
@@ -496,6 +598,20 @@ const changePage = (newPage) => {
     background: #fff;
     padding: 32px 40px;
     border-right: 1px solid #eee;
+
+    .toggle-btn {
+      margin-top: 10px;
+      background: transparent;
+      color: $blue;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 0;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
 
     ul {
       list-style: none;
@@ -641,16 +757,38 @@ const changePage = (newPage) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 998;
 }
 
 .popup-content {
-  width: 1084px;
   background: #fff;
+  width: 1084px;
+  max-height: 90vh;
   padding: 40px;
   border-radius: 10px;
   position: relative;
-  // text-align: center;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+  // Pour une meilleure apparence de scrollbar si tu veux :
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
 }
 
 .close-btn {
@@ -667,18 +805,19 @@ const changePage = (newPage) => {
   display: flex;
   gap: 40px;
   align-items: flex-start;
+  flex-wrap: wrap;
 
   .product-image {
-    flex: 1;
     position: relative;
     border-radius: 10px;
     display: flex;
     justify-content: center;
-    width: 50%;
+    width: 40%;
 
     img {
-      width: 100%;
+      width: 80%;
       object-fit: contain;
+      aspect-ratio: 1 / 1;
     }
 
     .discount {
@@ -690,7 +829,7 @@ const changePage = (newPage) => {
       font-weight: bold;
       font-size: 14px;
       padding: 4px 8px;
-      border-radius: 15px;
+      border-radius: 8px;
     }
   }
 
@@ -753,6 +892,20 @@ const changePage = (newPage) => {
       }
     }
   }
+
+  .product-description {
+    padding: 2rem 0;
+    border-top: 1px solid #ccc;
+    width: 100%;
+    color: #555;
+
+    h2 {
+      color: #000;
+      font-size: 20px;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+  }
 }
 
 .pagination {
@@ -792,6 +945,119 @@ const changePage = (newPage) => {
     &:hover:not(:disabled):not(.active) {
       background: $blue-hover;
       color: #fff;
+    }
+  }
+}
+
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.popup-loader {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #ccc;
+  border-top: 3px solid $blue;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1024px) {
+  .shop-container {
+    flex-direction: column;
+
+    .sidebar {
+      width: 100%;
+      padding: 20px;
+      border-right: none;
+      border-bottom: 1px solid #eee;
+    }
+  }
+
+  .order-cards {
+    flex-direction: column;
+    .card {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .shop-container .product-grid {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+
+    .product-card {
+      flex: 0 0 calc(33% - 15px); // Deux cartes par ligne avec 20px de gap
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-container .product-grid .product-card {
+    flex: 0 0 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    background-position: center;
+    form {
+      flex-direction: column;
+
+      .search-wrapper input,
+      button {
+        width: 100%;
+        min-width: unset;
+        border-radius: 5px;
+      }
+
+      button {
+        margin-top: 10px;
+        border-radius: 5px;
+      }
+    }
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-content {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .product-detail {
+    flex-direction: column;
+
+    .product-image {
+      width: 100%;
+      img {
+        width: 100%;
+      }
+    }
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+    button {
+      padding: 6px 10px;
+      font-size: 14px;
     }
   }
 }

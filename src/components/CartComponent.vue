@@ -242,7 +242,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useAuthStore } from '@/stores/authStore'
 
+const authStore = useAuthStore()
 const useCart = useCartStore()
 
 const router = useRouter()
@@ -254,6 +256,11 @@ const toggleCart = () => {
 }
 
 const checkoutPage = () => {
+  if (!authStore.token) {
+    isCartVisible.value = false
+    authStore.openLoginPopup()
+    return
+  }
   // Logic to navigate to the checkout page
   if (useCart.totalItems === 0) return
 
@@ -272,7 +279,7 @@ const checkoutPage = () => {
   background-color: $blue;
   color: #fff;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  z-index: 999;
   border-radius: 8px 0 0 8px;
   text-align: center;
 

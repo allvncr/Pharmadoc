@@ -245,4 +245,54 @@ main {
     }
   }
 }
+@media (max-width: 1024px) {
+  .checkout-container {
+    flex-direction: column;
+    padding: 1.5rem;
+
+    .checkout-left,
+    .checkout-right {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout-container {
+    padding: 1rem;
+    gap: 1rem;
+
+    .checkout-left .checkout-section {
+      padding: 0.75rem;
+
+      .section-header h3 {
+        font-size: 0.95rem;
+      }
+
+      .section-input,
+      .section-textarea {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+      }
+    }
+
+    .checkout-right {
+      padding: 0.75rem;
+
+      h4 {
+        font-size: 1rem;
+      }
+
+      .order-list li,
+      .order-summary div {
+        font-size: 0.85rem;
+      }
+
+      .checkout-button {
+        font-size: 0.95rem;
+        padding: 0.6rem;
+      }
+    }
+  }
+}
 </style>

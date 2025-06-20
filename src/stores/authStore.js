@@ -5,7 +5,8 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
     token: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')) : null,
-    error: null
+    error: null,
+    showLoginPopup: false
   }),
 
   actions: {
@@ -59,6 +60,10 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       window.location.href = '/login'
+    },
+
+    openLoginPopup() {
+      this.showLoginPopup = true
     }
   }
 })

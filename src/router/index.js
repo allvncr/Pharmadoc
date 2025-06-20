@@ -16,12 +16,6 @@ const router = createRouter({
       component: () => import('../views/CheckoutView.vue')
     },
     {
-      path: '/medicaments',
-      name: 'Recherche',
-      meta: { title: 'Recherche' },
-      component: () => import('../views/SearchView.vue')
-    },
-    {
       path: '/help',
       name: "Centre d'aide",
       meta: { title: "Centre d'aide" },
