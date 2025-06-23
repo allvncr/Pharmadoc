@@ -7,10 +7,22 @@
 
     <div class="right">
       <router-link to="/help">Besoin d'aide ?</router-link>
-      <a class="btn-link" @click="authStore.showLoginPopup = true" v-if="!authStore.token"
-        >Se connecter</a
-      >
-      <a class="btn-link logout" @click="authStore.logout" v-else>Se deconnecter</a>
+
+      <div class="btn-link" @click="authStore.showLoginPopup = true" v-if="!authStore.token">
+        Se connecter
+      </div>
+
+      <div class="user-menu" v-else @click="showDropdown = !showDropdown">
+        Bonjour, {{ authStore.user.firstname }}
+        <svg width="12" height="12" style="margin-left: 6px" viewBox="0 0 20 20">
+          <path d="M5 7l5 5 5-5H5z" fill="currentColor" />
+        </svg>
+
+        <ul v-if="showDropdown" class="dropdown">
+          <li><router-link to="/profile">Profil</router-link></li>
+          <li @click="authStore.logout">Déconnexion</li>
+        </ul>
+      </div>
     </div>
 
     <!-- Popup -->
@@ -103,6 +115,11 @@ const lastName = ref('')
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const showDropdown = ref(false)
+
+window.addEventListener('click', (e) => {
+  if (!e.target.closest('.user-menu')) showDropdown.value = false
+})
 
 // Gérer la connexion
 const handleLogin = async () => {
@@ -118,8 +135,8 @@ const handleLogin = async () => {
 const handleRegister = async () => {
   try {
     await authStore.register({
-      firstname: firstName.value,
-      lastname: lastName.value,
+      firstName: firstName.value,
+      lastName: lastName.value,
       email: email.value,
       password: password.value
     })
@@ -170,6 +187,10 @@ header {
   }
 
   .right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
     a {
       @media (max-width: $phone) {
         display: none;
@@ -373,6 +394,52 @@ header {
       color: $blue;
       font-weight: 600;
       text-decoration: underline;
+    }
+  }
+}
+
+.user-menu {
+  position: relative;
+  cursor: pointer;
+  background: $blue;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: 600;
+  margin-left: 24px;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background: $blue-hover;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    color: #333;
+    list-style: none;
+    padding: 0.5rem 0;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    width: 160px;
+    z-index: 100;
+
+    li {
+      padding: 10px 16px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #f5f5f5;
+      }
+
+      a {
+        color: #333;
+        text-decoration: none;
+      }
     }
   }
 }
