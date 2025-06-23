@@ -101,7 +101,7 @@ const handleOrder = () => {
   orderStore.create_order(orderDetails).then(() => {
     alert('Commande validée avec succès !')
     useCart.clearCart()
-    router.push('/')
+    router.push('/profil')
   })
 }
 </script>

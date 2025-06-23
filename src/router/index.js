@@ -22,10 +22,10 @@ const router = createRouter({
       component: () => import('../views/HelpView.vue')
     },
     {
-      path: '/pharmacie-garde',
-      name: 'Pharmacie de Garde',
-      meta: { title: 'Pharmacie de Garde' },
-      component: () => import('../views/PharmaGarde.vue')
+      path: '/profil',
+      name: 'Profil',
+      meta: { title: 'Profil' },
+      component: () => import('../views/ProfilPage.vue')
     },
     {
       path: '/:catchAll(.*)',

@@ -13,13 +13,13 @@
       </div>
 
       <div class="user-menu" v-else @click="showDropdown = !showDropdown">
-        Bonjour, {{ authStore.user.firstname }}
+        Bonjour, {{ authStore.user.firstName }}
         <svg width="12" height="12" style="margin-left: 6px" viewBox="0 0 20 20">
           <path d="M5 7l5 5 5-5H5z" fill="currentColor" />
         </svg>
 
         <ul v-if="showDropdown" class="dropdown">
-          <li><router-link to="/profile">Profil</router-link></li>
+          <li><router-link to="/profil">Profil</router-link></li>
           <li @click="authStore.logout">Déconnexion</li>
         </ul>
       </div>
@@ -437,6 +437,7 @@ header {
       }
 
       a {
+        display: block;
         color: #333;
         text-decoration: none;
       }

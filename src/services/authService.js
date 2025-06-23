@@ -10,9 +10,19 @@ export const register = async (userData) => {
 }
 
 export const updateUser = async (token, userData) => {
-  return await axios.patch(domain + '/users', userData, {
-    headers: {
-      Authorization: `Bearer ${token}`
+  const url = domain + (userData.id ? '/users/' + userData.id : '/users/me')
+
+  return axios.patch(
+    url,
+    {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  })
+  )
 }

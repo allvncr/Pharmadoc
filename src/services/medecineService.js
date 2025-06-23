@@ -27,3 +27,11 @@ export const passOrder = async (orderDetails) => {
     }
   })
 }
+
+export const getOrders = async (token, ID) => {
+  return await axios.get(domain + '/orders/' + ID, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+}
