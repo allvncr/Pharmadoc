@@ -35,7 +35,7 @@
               <td>
                 <a href="#">{{ order.orderNumber }}</a>
               </td>
-              <td>{{ order.orderDate }}</td>
+              <td>{{ formatDate(order.orderDate) }}</td>
               <td>
                 <span :class="['status', order.status.toLowerCase()]">{{ order.status }}</span>
               </td>
@@ -68,6 +68,8 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrderStore } from '@/stores/orderStore'
+import { format } from 'date-fns'
+import frLocale from 'date-fns/locale/fr'
 
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
@@ -76,9 +78,12 @@ const activeTab = ref('personal')
 
 const userInitials = (authStore.user.firstName[0] + authStore.user.lastName[0]).toUpperCase()
 
+const formatDate = (dateStr) => {
+  return format(new Date(dateStr), 'dd MMMM yyyy, H:m', { locale: frLocale })
+}
+
 const logout = () => {
-  alert('Déconnexion…')
-  // authStore.logout() ou router.push('/login')
+  authStore.logout()
 }
 
 const handleUpdate = async () => {

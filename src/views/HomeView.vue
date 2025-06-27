@@ -1,6 +1,5 @@
 <template>
   <main>
-    <CartComponent />
     <section class="hero">
       <div class="container">
         <h1>Trouvez vos médicaments en un clic</h1>
@@ -36,13 +35,17 @@
     </section>
 
     <div class="order-cards">
-      <div class="card" v-for="(card, index) in cards" :key="index">
-        <div class="card-content">
-          <h2>{{ card.title }}</h2>
-          <p>{{ card.subtitle }}</p>
-          <button>Commandez maintenant</button>
-        </div>
-        <!-- <img :src="card.image" :alt="card.title" /> -->
+      <div class="card">
+        <img
+          src="https://lasante-images.s3.eu-west-1.amazonaws.com/temp/2025-06-Banniere-Homepage-Soldes.webp"
+          alt=""
+        />
+      </div>
+      <div class="card">
+        <img
+          src="https://lasante-images.s3.eu-west-1.amazonaws.com/Banniere+Homepage+Bausch+Lomb+S26+2025.webp"
+          alt=""
+        />
       </div>
     </div>
 
@@ -278,9 +281,14 @@
 
             <p>{{ selectedProduct.smallDescription }}</p>
 
-            <button class="add-cart-btn" @click="useCart.addItem(selectedProduct)">
-              Ajouter au panier
-            </button>
+            <!-- 👇 Sélecteur de quantité -->
+            <div class="quantity-selector">
+              <label for="qty">Quantité :</label>
+              <input type="number" id="qty" min="1" v-model.number="selectedQuantity" />
+            </div>
+
+            <!-- 👇 Ajout avec quantité -->
+            <button class="add-cart-btn" @click="addToCart">Ajouter au panier</button>
           </div>
           <div class="product-description">
             <h2>Description</h2>
@@ -300,7 +308,6 @@ import { ref, onMounted, computed } from 'vue'
 import debounce from 'lodash/debounce'
 import { useCartStore } from '../stores/cart'
 import { useMedecineStore } from '@/stores/medecineStore'
-import CartComponent from '../components/CartComponent.vue'
 import SearchIcon from '@/components/icons/searchIcon.vue'
 
 const isPopupOpen = ref(false)
@@ -312,6 +319,12 @@ const page = ref(0)
 const size = ref(8)
 const selectedCategoryId = ref(null)
 const showAllCategories = ref(false)
+const selectedQuantity = ref(1)
+
+const addToCart = () => {
+  useCart.addItem({ ...selectedProduct.value, quantity: selectedQuantity.value })
+  closePopup()
+}
 
 const displayedCategories = computed(() => {
   return showAllCategories.value ? medecineStore.categories : medecineStore.categories.slice(0, 6)
@@ -326,24 +339,6 @@ onMounted(() => {
   medecineStore.all_medecines({ page: page.value, size: size.value })
   medecineStore.all_categories()
 })
-
-const cards = [
-  {
-    title: 'Commande client',
-    subtitle: 'Commandez vos médicaments en ligne',
-    image: '/assets/images/order.png'
-  },
-  {
-    title: 'Livraison rapide',
-    subtitle: 'Livraison rapide et sécurisée à domicile',
-    image: '/assets/images/delivery.png'
-  },
-  {
-    title: 'Soins de santé',
-    subtitle: 'Accédez à des soins de santé de qualité à portée de main',
-    image: '/assets/images/healthcare.png'
-  }
-]
 
 const openProduct = (productId) => {
   medecineStore
@@ -391,6 +386,11 @@ const changePage = (newPage) => {
 
 <style lang="scss" scoped>
 .hero {
+  @media (max-width: $phone) {
+    align-items: flex-start;
+    padding-top: 32px;
+    height: calc(80vh - 80px);
+  }
   background-color: #f3f4f6;
   background-image: url('../assets/images/Carousel.webp');
   height: calc(100vh - 80px);
@@ -402,7 +402,10 @@ const changePage = (newPage) => {
 
   h1 {
     @media (max-width: $tablette) {
-      font-size: 32px;
+      font-size: 28px;
+    }
+    @media (max-width: $phone) {
+      font-size: 20px;
     }
     color: $blue;
     font-size: 38px;
@@ -411,6 +414,9 @@ const changePage = (newPage) => {
     text-align: center;
   }
   p {
+    @media (max-width: $phone) {
+      font-size: 16px;
+    }
     font-size: 18px;
     text-align: center;
   }
@@ -541,52 +547,12 @@ const changePage = (newPage) => {
   .card {
     flex: 1;
     background: #eaf4fc;
-    padding: 20px;
     border-radius: 10px;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 
-    &:nth-child(2) {
-      background: #c9f5e6;
+    img {
+      width: 100%;
     }
-
-    &:nth-child(3) {
-      background: #d5ecfc;
-    }
-
-    .card-content {
-      h2 {
-        font-size: 18px;
-        font-weight: 500;
-        margin-bottom: 10px;
-      }
-      p {
-        font-size: 1rem;
-        margin-bottom: 20px;
-      }
-      button {
-        background-color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-        transition: background 0.3s ease;
-
-        &:hover {
-          background-color: #f2f2f2;
-        }
-      }
-    }
-
-    // img {
-    //   width: 100px;
-    //   position: absolute;
-    //   bottom: 10px;
-    //   right: 10px;
-    // }
   }
 }
 
@@ -631,7 +597,9 @@ const changePage = (newPage) => {
 
         &:hover,
         &.active {
+          font-weight: 700;
           color: $blue-hover;
+          text-decoration: underline;
         }
       }
     }
@@ -906,6 +874,20 @@ const changePage = (newPage) => {
       font-weight: 500;
     }
   }
+
+  .quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 1rem 0;
+
+    input {
+      width: 60px;
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  }
 }
 
 .pagination {
@@ -1032,6 +1014,14 @@ const changePage = (newPage) => {
 
   .product-grid {
     grid-template-columns: 1fr;
+  }
+
+  .popup-content .close-btn {
+    display: block;
+    position: relative;
+    top: 0;
+    right: 0;
+    justify-self: flex-end;
   }
 }
 

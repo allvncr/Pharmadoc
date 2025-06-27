@@ -32,12 +32,16 @@
 
     <!-- BACKDROP -->
     <transition name="fade">
-      <div v-if="isCartVisible" class="cart-backdrop" @click="isCartVisible = false"></div>
+      <div
+        v-if="useCart.isCartVisible"
+        class="cart-backdrop"
+        @click="useCart.isCartVisible = false"
+      ></div>
     </transition>
 
     <!-- Cart Panel -->
     <transition name="slide">
-      <div v-if="isCartVisible" class="cart-content">
+      <div v-if="useCart.isCartVisible" class="cart-content">
         <!-- Contenu du panier -->
         <div class="cart-header">
           <div class="cart-icon">
@@ -65,7 +69,7 @@
             </svg>
             {{ useCart.totalItems }} Items
           </div>
-          <button class="close-btn" @click="isCartVisible = false">✕</button>
+          <button class="close-btn" @click="useCart.isCartVisible = false">✕</button>
         </div>
 
         <div class="cart-items" v-if="useCart.totalItems > 0">
@@ -239,7 +243,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '@/stores/authStore'
@@ -249,28 +252,29 @@ const useCart = useCartStore()
 
 const router = useRouter()
 
-const isCartVisible = ref(false)
-
 const toggleCart = () => {
-  isCartVisible.value = !isCartVisible.value
+  useCart.isCartVisible = !useCart.isCartVisible
 }
 
 const checkoutPage = () => {
   if (!authStore.token) {
-    isCartVisible.value = false
+    useCart.isCartVisible = false
     authStore.openLoginPopup()
     return
   }
   // Logic to navigate to the checkout page
   if (useCart.totalItems === 0) return
 
-  isCartVisible.value = false
+  useCart.isCartVisible = false
   router.push('/checkout')
 }
 </script>
 
 <style lang="scss" scoped>
 .cart-summary {
+  @media (max-width: $phone) {
+    display: none;
+  }
   cursor: pointer;
   position: fixed;
   top: 50%;

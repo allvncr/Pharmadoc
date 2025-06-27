@@ -6,6 +6,30 @@
     </router-link>
 
     <div class="right">
+      <div class="panier" @click="toggleCart">
+        <svg width="14" height="16" class="shrink-0" viewBox="0 0 12.686 16">
+          <g transform="translate(-27.023 -2)">
+            <g transform="translate(27.023 5.156)">
+              <g>
+                <path
+                  d="M65.7,111.043l-.714-9A1.125,1.125,0,0,0,63.871,101H62.459V103.1a.469.469,0,1,1-.937,0V101H57.211V103.1a.469.469,0,1,1-.937,0V101H54.862a1.125,1.125,0,0,0-1.117,1.033l-.715,9.006a2.605,2.605,0,0,0,2.6,2.8H63.1a2.605,2.605,0,0,0,2.6-2.806Zm-4.224-4.585-2.424,2.424a.468.468,0,0,1-.663,0l-1.136-1.136a.469.469,0,0,1,.663-.663l.8.8,2.092-2.092a.469.469,0,1,1,.663.663Z"
+                  transform="translate(-53.023 -101.005)"
+                  fill="#216cc8"
+                ></path>
+              </g>
+            </g>
+            <g transform="translate(30.274 2)">
+              <g>
+                <path
+                  d="M160.132,0a3.1,3.1,0,0,0-3.093,3.093v.063h.937V3.093a2.155,2.155,0,1,1,4.311,0v.063h.937V3.093A3.1,3.1,0,0,0,160.132,0Z"
+                  transform="translate(-157.039)"
+                  fill="#216cc8"
+                ></path>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
       <router-link to="/help">Besoin d'aide ?</router-link>
 
       <div class="btn-link" @click="authStore.showLoginPopup = true" v-if="!authStore.token">
@@ -13,7 +37,7 @@
       </div>
 
       <div class="user-menu" v-else @click="showDropdown = !showDropdown">
-        Bonjour, {{ authStore.user.firstName }}
+        {{ authStore.user.firstName }}
         <svg width="12" height="12" style="margin-left: 6px" viewBox="0 0 20 20">
           <path d="M5 7l5 5 5-5H5z" fill="currentColor" />
         </svg>
@@ -106,8 +130,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import { useCartStore } from '../stores/cart'
 
 const authStore = useAuthStore()
+const useCart = useCartStore()
 
 const showRegisterPopup = ref(false)
 const firstName = ref('')
@@ -116,6 +142,10 @@ const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const showDropdown = ref(false)
+
+const toggleCart = () => {
+  useCart.isCartVisible = !useCart.isCartVisible
+}
 
 window.addEventListener('click', (e) => {
   if (!e.target.closest('.user-menu')) showDropdown.value = false
@@ -169,9 +199,10 @@ header {
 
   .logo {
     @media (max-width: $phone) {
-      font-size: 16px;
+      font-size: 14px;
+      flex-direction: column;
       img {
-        width: 24px;
+        width: 32px !important;
       }
     }
     display: flex;
@@ -191,6 +222,18 @@ header {
     gap: 8px;
     align-items: center;
 
+    .panier {
+      display: none;
+
+      @media (max-width: $phone) {
+        display: block;
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
+    }
+
     a {
       @media (max-width: $phone) {
         display: none;
@@ -207,6 +250,7 @@ header {
     .btn-link {
       @media (max-width: $phone) {
         display: block;
+        margin-left: 8px;
       }
       cursor: pointer;
       margin-left: 24px;

@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -104,6 +104,12 @@ const handleOrder = () => {
     router.push('/profil')
   })
 }
+
+onMounted(() => {
+  if (useCart.items.length === 0) {
+    router.push('/')
+  }
+})
 </script>
 
 <style lang="scss" scoped>
