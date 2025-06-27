@@ -51,23 +51,22 @@
 
     <div class="shop-container">
       <aside class="sidebar">
-        <ul>
+        <button class="category-toggle" @click="showAllCategories = !showAllCategories">
+          Catégorie <span v-if="showAllCategories">▲</span><span v-else>▼</span>
+        </button>
+        <ul v-show="showAllCategories || isDesktop" class="category-list">
           <li @click="handleCategory(null)" :class="{ active: !selectedCategoryId }">
             <span>Tous</span>
           </li>
           <li
-            v-for="(category, i) in displayedCategories"
-            :key="i"
+            v-for="category in medecineStore.categories"
+            :key="category.id"
             @click="handleCategory(category.id)"
             :class="{ active: selectedCategoryId === category.id }"
           >
             <span>{{ category.name }}</span>
           </li>
         </ul>
-
-        <button class="toggle-btn" @click="showAllCategories = !showAllCategories">
-          {{ showAllCategories ? 'Afficher moins' : 'Afficher plus' }}
-        </button>
       </aside>
 
       <section class="product-grid">
@@ -326,10 +325,6 @@ const addToCart = () => {
   closePopup()
 }
 
-const displayedCategories = computed(() => {
-  return showAllCategories.value ? medecineStore.categories : medecineStore.categories.slice(0, 6)
-})
-
 const debouncedSearch = debounce(() => {
   medecineStore.all_medecines({ page: 0, size: size.value, name: search.value })
 }, 300)
@@ -361,6 +356,7 @@ const handleCategory = (ID) => {
   search.value = ''
   selectedCategoryId.value = ID
   medecineStore.all_medecines({ page: 0, size: size.value, name: search.value, categoryId: ID })
+  showAllCategories.value = false
 }
 
 const handleSearch = () => {
@@ -382,6 +378,8 @@ const changePage = (newPage) => {
     categoryId: selectedCategoryId.value
   })
 }
+
+const isDesktop = computed(() => window.innerWidth > 768)
 </script>
 
 <style lang="scss" scoped>
@@ -1049,6 +1047,42 @@ const changePage = (newPage) => {
       padding: 6px 10px;
       font-size: 14px;
     }
+  }
+}
+
+/* Mobiles : toggle + scrollable list */
+.category-toggle {
+  display: none;
+  width: 100%;
+  padding: 12px;
+  background: $blue;
+  color: #fff;
+  text-align: left;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.category-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Résponsivité */
+@media (max-width: 768px) {
+  .category-toggle {
+    display: block;
+  }
+
+  .category-list {
+    display: none;
+    margin-bottom: 12px;
+  }
+
+  .category-list[style] {
+    display: block;
   }
 }
 </style>
