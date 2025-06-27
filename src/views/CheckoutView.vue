@@ -106,7 +106,7 @@ const handleOrder = () => {
 }
 
 onMounted(() => {
-  if (useCart.items.length === 0) {
+  if (useCart.items.length === 0 || !authStore.token) {
     router.push('/')
   }
 })
