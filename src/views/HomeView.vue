@@ -52,7 +52,7 @@
     <div class="shop-container">
       <aside class="sidebar">
         <button class="category-toggle" @click="showAllCategories = !showAllCategories">
-          Catégorie <span v-if="showAllCategories">▲</span><span v-else>▼</span>
+          Catégories <span v-if="showAllCategories">▲</span><span v-else>▼</span>
         </button>
         <ul v-show="showAllCategories || isDesktop" class="category-list">
           <li @click="handleCategory(null)" :class="{ active: !selectedCategoryId }">

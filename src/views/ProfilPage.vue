@@ -31,7 +31,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="order in orderStore.orders" :key="order.id">
+            <tr
+              v-for="order in orderStore.orders"
+              :key="order.id"
+              @click="openOrder(order.orderNumber)"
+            >
               <td>
                 <a href="#">{{ order.orderNumber }}</a>
               </td>
@@ -61,6 +65,32 @@
         </form>
       </div>
     </section>
+
+    <div v-if="isOrderPopupOpen" class="popup-overlay" @click.self="closeOrderPopup">
+      <div class="popup-content">
+        <button class="close-btn" @click="closeOrderPopup">&times;</button>
+        <h3>Détails de la commande</h3>
+
+        <p><strong>Numéro:</strong> {{ selectedOrder.orderNumber }}</p>
+        <p><strong>Date:</strong> {{ formatDate(selectedOrder.orderDate) }}</p>
+        <p><strong>Statut:</strong> {{ selectedOrder.status }}</p>
+        <p><strong>Adresse:</strong> {{ selectedOrder.address }}</p>
+        <p><strong>Téléphone:</strong> {{ selectedOrder.phoneNumber }}</p>
+        <p><strong>Total:</strong> {{ selectedOrder.totalAmount.toLocaleString('fr-CI') }} Fcfa</p>
+
+        <h4>Produits :</h4>
+        <div class="order-line" v-for="line in selectedOrder.orderLines" :key="line.id">
+          <img :src="line.medicine.url" :alt="line.medicine.name" />
+          <div class="info">
+            <p>
+              <strong>{{ line.medicine.name }}</strong>
+            </p>
+            <p>Quantité : {{ line.quantity }}</p>
+            <p>Prix unitaire : {{ line.medicine.newPrice.toLocaleString('fr-CI') }} Fcfa</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -70,6 +100,8 @@ import { useAuthStore } from '@/stores/authStore'
 import { useOrderStore } from '@/stores/orderStore'
 import { format } from 'date-fns'
 import frLocale from 'date-fns/locale/fr'
+const isOrderPopupOpen = ref(false)
+const selectedOrder = ref({})
 
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
@@ -80,6 +112,21 @@ const userInitials = (authStore.user.firstName[0] + authStore.user.lastName[0]).
 
 const formatDate = (dateStr) => {
   return format(new Date(dateStr), 'dd MMMM yyyy, H:m', { locale: frLocale })
+}
+
+const openOrder = async (orderNumber) => {
+  try {
+    const order = await orderStore.one_order(orderNumber)
+    selectedOrder.value = order
+    isOrderPopupOpen.value = true
+  } catch (err) {
+    console.error('Erreur lors du chargement de la commande', err)
+  }
+}
+
+const closeOrderPopup = () => {
+  isOrderPopupOpen.value = false
+  selectedOrder.value = {}
 }
 
 const logout = () => {
@@ -288,6 +335,202 @@ onMounted(() => {
 
     &:hover {
       background-color: $blue-hover;
+    }
+  }
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+
+  h3 {
+    margin-bottom: 1rem;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .order-line {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+
+    img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .info p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .profile-page {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 1rem;
+
+    .user-card {
+      display: none; // ou display: flex pour l'afficher
+    }
+
+    .nav-links {
+      flex-direction: row;
+      gap: 10px;
+
+      button {
+        flex: 1;
+        padding: 10px;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .logout {
+        flex: 0;
+        padding: 10px;
+      }
+    }
+  }
+
+  .content {
+    padding: 1.5rem;
+  }
+
+  .orders-table {
+    font-size: 12px;
+
+    th,
+    td {
+      padding: 10px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .orders-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border: 0;
+    background: transparent;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      display: block;
+      margin-bottom: 12px;
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border: none;
+      font-size: 14px;
+
+      &::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 12px;
+        color: #666;
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .profile-page {
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    max-width: 100vw;
+    box-sizing: border-box;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    overflow-x: auto;
+
+    .user-card {
+      display: none;
+    }
+
+    .nav-links {
+      display: flex;
+      flex: 1;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      button {
+        flex: 1 1 100px;
+        white-space: nowrap;
+        font-size: 14px;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .logout {
+        flex: 1 1 100%;
+        text-align: center;
+        color: #f44336;
+      }
     }
   }
 }

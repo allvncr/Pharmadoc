@@ -29,6 +29,7 @@
             </g>
           </g>
         </svg>
+        ({{ cartStore.items.length }})
       </div>
       <router-link to="/help">Besoin d'aide ?</router-link>
 
@@ -37,6 +38,23 @@
       </div>
 
       <div class="user-menu" v-else @click="showDropdown = !showDropdown">
+        <svg
+          width="18"
+          height="18"
+          style="margin-right: 4px"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M40 42V38C40 35.8783 39.1571 33.8434 37.6569 32.3431C36.1566 30.8429 34.1217 30 32 30H16C13.8783 30 11.8434 30.8429 10.3431 32.3431C8.84285 33.8434 8 35.8783 8 38V42M32 14C32 18.4183 28.4183 22 24 22C19.5817 22 16 18.4183 16 14C16 9.58172 19.5817 6 24 6C28.4183 6 32 9.58172 32 14Z"
+            stroke="#fff"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+
         {{ authStore.user.firstName }}
         <svg width="12" height="12" style="margin-left: 6px" viewBox="0 0 20 20">
           <path d="M5 7l5 5 5-5H5z" fill="currentColor" />
@@ -133,7 +151,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useCartStore } from '../stores/cart'
 
 const authStore = useAuthStore()
-const useCart = useCartStore()
+const cartStore = useCartStore()
 
 const showRegisterPopup = ref(false)
 const firstName = ref('')
@@ -144,7 +162,7 @@ const showPassword = ref(false)
 const showDropdown = ref(false)
 
 const toggleCart = () => {
-  useCart.isCartVisible = !useCart.isCartVisible
+  cartStore.isCartVisible = !cartStore.isCartVisible
 }
 
 window.addEventListener('click', (e) => {
@@ -226,7 +244,8 @@ header {
       display: none;
 
       @media (max-width: $phone) {
-        display: block;
+        display: flex;
+        align-items: center;
         svg {
           width: 24px;
           height: 24px;
@@ -251,6 +270,8 @@ header {
       @media (max-width: $phone) {
         display: block;
         margin-left: 8px;
+        padding: 4px 8px;
+        font-size: 12px;
       }
       cursor: pointer;
       margin-left: 24px;
@@ -443,6 +464,9 @@ header {
 }
 
 .user-menu {
+  @media (max-width: $phone) {
+    margin-left: 0;
+  }
   position: relative;
   cursor: pointer;
   background: $blue;
