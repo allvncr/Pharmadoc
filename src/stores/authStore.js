@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       localStorage.removeItem('user')
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      window.location.href = '/'
     },
 
     openLoginPopup() {
