@@ -44,7 +44,7 @@ export const useAuthStore = defineStore('auth', {
     async updateUser(userData) {
       try {
         const response = await updateUser(this.token, userData)
-        this.user = response.data.user
+        this.user = response.data
         localStorage.setItem('user', JSON.stringify(this.user))
         this.error = null
       } catch (err) {

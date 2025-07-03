@@ -69,28 +69,49 @@
     <div v-if="isOrderPopupOpen" class="popup-overlay" @click.self="closeOrderPopup">
       <div class="popup-content">
         <button class="close-btn" @click="closeOrderPopup">&times;</button>
-        <h3>Détails de la commande</h3>
 
-        <p><strong>Numéro:</strong> {{ selectedOrder.orderNumber }}</p>
-        <p><strong>Date:</strong> {{ formatDate(selectedOrder.orderDate) }}</p>
-        <p><strong>Statut:</strong> {{ selectedOrder.status }}</p>
-        <p><strong>Adresse:</strong> {{ selectedOrder.address }}</p>
-        <p><strong>Téléphone:</strong> {{ selectedOrder.phoneNumber }}</p>
-        <p><strong>Total:</strong> {{ selectedOrder.totalAmount.toLocaleString('fr-CI') }} Fcfa</p>
+        <div class="order-header">
+          <p><strong>Numéro de commande :</strong> {{ selectedOrder.orderNumber }}</p>
+          <p><strong>Date :</strong> {{ formatDate(selectedOrder.orderDate) }}</p>
+          <p><strong>Commentaire :</strong> {{ selectedOrder.comment }}</p>
+          <p>
+            <strong>Statut :</strong>
+            <span class="status-tag">{{ selectedOrder.status }}</span>
+          </p>
+        </div>
 
-        <h4>Produits :</h4>
-        <div class="order-line" v-for="line in selectedOrder.orderLines" :key="line.id">
-          <img :src="line.medicine.url" :alt="line.medicine.name" />
-          <div class="info">
-            <p>
-              <strong>{{ line.medicine.name }}</strong>
-            </p>
-            <p>Quantité : {{ line.quantity }}</p>
-            <p>Prix unitaire : {{ line.medicine.newPrice.toLocaleString('fr-CI') }} Fcfa</p>
-          </div>
+        <h4>Articles commandés</h4>
+
+        <table class="order-detail-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Image</th>
+              <th>Quantité</th>
+              <th>Prix unitaire</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="line in selectedOrder.orderLines" :key="line.id">
+              <td>{{ line.medicine.name }}</td>
+              <td>
+                <img :src="line.medicine.url" :alt="line.medicine.name" />
+              </td>
+              <td>{{ line.quantity }}</td>
+              <td>{{ line.medicine.newPrice.toLocaleString('fr-CI') }} Fcfa</td>
+              <td>{{ (line.medicine.newPrice * line.quantity).toLocaleString('fr-CI') }} Fcfa</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="order-total">
+          Total de la commande : {{ selectedOrder.totalAmount.toLocaleString('fr-CI') }} Fcfa
         </div>
       </div>
     </div>
+
+    <div v-if="showToast" class="toast-message">Profile mis à jour avec succès ✔️</div>
   </main>
 </template>
 
@@ -106,6 +127,7 @@ const selectedOrder = ref({})
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 
+const showToast = ref(false)
 const activeTab = ref('personal')
 
 const userInitials = (authStore.user.firstName[0] + authStore.user.lastName[0]).toUpperCase()
@@ -141,6 +163,11 @@ const handleUpdate = async () => {
       lastName: authStore.user.lastName,
       email: authStore.user.email
     })
+
+    showToast.value = true
+    setTimeout(() => {
+      showToast.value = false
+    }, 2500)
   } catch (error) {
     alert(error)
   }
@@ -392,6 +419,95 @@ onMounted(() => {
       font-size: 14px;
     }
   }
+
+  .order-header {
+    background: #f9f9f9;
+    padding: 16px;
+    margin-bottom: 24px;
+    border-radius: 8px;
+
+    p {
+      margin: 8px 0;
+    }
+
+    .status-tag {
+      background: #fef08a;
+      color: #92400e;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+  }
+
+  .order-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+
+    th {
+      background: #f1f1f1;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+      vertical-align: middle;
+
+      img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border: 1px solid #eee;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .order-total {
+    text-align: right;
+    margin-top: 16px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+}
+
+.toast-message {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  background: #38a169;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  animation: fadeInOut 2.5s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -531,6 +647,69 @@ onMounted(() => {
         text-align: center;
         color: #f44336;
       }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .order-detail-table {
+    display: block;
+    width: 100%;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border: none;
+
+      &:nth-child(2) {
+        justify-content: center;
+        img {
+          margin: 8px 0;
+        }
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #333;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .order-total {
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .order-header {
+    p {
+      font-size: 14px;
+    }
+
+    .status-tag {
+      font-size: 12px;
     }
   }
 }

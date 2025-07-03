@@ -65,6 +65,7 @@
         </div>
       </form>
     </div>
+    <div v-if="showToast" class="toast-message">Commande validée avec succès ✔️</div>
   </main>
 </template>
 
@@ -77,9 +78,10 @@ import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrderStore } from '@/stores/orderStore'
 
-const phoneNumber = ref('0711935630')
-const address = ref('YOP')
-const comment = ref('Aucun')
+const showToast = ref(false)
+const phoneNumber = ref('')
+const address = ref('')
+const comment = ref('')
 
 const useCart = useCartStore()
 const authStore = useAuthStore()
@@ -94,14 +96,19 @@ const handleOrder = () => {
     order: {
       userId: authStore.user.id,
       address: address.value,
-      phoneNumber: phoneNumber.value
+      phoneNumber: phoneNumber.value,
+      comment: comment.value
     }
   }
 
   orderStore.create_order(orderDetails).then(() => {
-    alert('Commande validée avec succès !')
-    useCart.clearCart()
-    router.push('/profil')
+    showToast.value = true
+
+    setTimeout(() => {
+      showToast.value = false
+      useCart.clearCart()
+      router.push('/profil')
+    }, 2500)
   })
 }
 
@@ -252,6 +259,38 @@ main {
     }
   }
 }
+.toast-message {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  background: #38a169;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  animation: fadeInOut 2.5s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
 @media (max-width: 1024px) {
   .checkout-container {
     flex-direction: column;
