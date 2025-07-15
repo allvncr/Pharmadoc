@@ -349,6 +349,7 @@ const openProduct = (productId) => {
 
 const closePopup = () => {
   isPopupOpen.value = false
+  selectedQuantity.value = 1
   selectedProduct.value = {}
 }
 

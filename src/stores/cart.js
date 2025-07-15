@@ -14,7 +14,7 @@ export const useCartStore = defineStore('cart', {
     addItem(product) {
       const existingItem = this.items.find((item) => item.id === product.id)
       if (existingItem) {
-        existingItem.quantity++
+        existingItem.quantity += product.quantity || 1
       } else {
         this.items.push({ ...product, quantity: product.quantity || 1 })
       }
