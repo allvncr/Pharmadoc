@@ -61,6 +61,37 @@
           <label>Email</label>
           <input type="email" v-model="authStore.user.email" required />
 
+          <label>Date de naissance</label>
+          <input type="date" v-model="authStore.user.birthDate" required />
+
+          <label>Pièce d'Identité (Recto/Verso)</label>
+          <template v-if="!authStore.user.valid">
+            <input type="file" multiple ref="fileInput" />
+          </template>
+          <template v-else>
+            <div class="identity-images">
+              <div
+                v-for="(url, idx) in authStore.user.urls"
+                :key="url"
+                class="identity-image"
+                :style="{ marginRight: (idx + 1) % 3 === 0 ? '0' : '12px' }"
+                style="display: inline-block; margin-bottom: 12px"
+              >
+                <img
+                  :src="url"
+                  alt="Pièce d'identité"
+                  style="
+                    width: 120px;
+                    height: 80px;
+                    object-fit: cover;
+                    border-radius: 6px;
+                    border: 1px solid #eee;
+                  "
+                />
+              </div>
+            </div>
+          </template>
+
           <button type="submit" class="login-button">Mettre à jour</button>
         </form>
       </div>
@@ -112,11 +143,16 @@
     </div>
 
     <div v-if="showToast" class="toast-message">Profile mis à jour avec succès ✔️</div>
+    <div v-if="showProfilToast" class="toast-message error">Vous devez compléter votre profil</div>
+    <div v-if="authStore.showValidToast" class="toast-message error">
+      Votre compte doit être validé par un administrateur avant de pouvoir naviguer sur le site.
+    </div>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useOrderStore } from '@/stores/orderStore'
 import { format } from 'date-fns'
@@ -124,13 +160,18 @@ import frLocale from 'date-fns/locale/fr'
 const isOrderPopupOpen = ref(false)
 const selectedOrder = ref({})
 
+const router = useRouter()
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 
 const showToast = ref(false)
+const showProfilToast = ref(false)
 const activeTab = ref('personal')
+const fileInput = ref(null)
 
-const userInitials = (authStore.user.firstName[0] + authStore.user.lastName[0]).toUpperCase()
+const userInitials = (
+  (authStore.user.firstName?.[0] || '') + (authStore.user.lastName?.[0] || '')
+).toUpperCase()
 
 const formatDate = (dateStr) => {
   return format(new Date(dateStr), 'dd MMMM yyyy, H:m', { locale: frLocale })
@@ -157,12 +198,19 @@ const logout = () => {
 
 const handleUpdate = async () => {
   try {
-    await authStore.updateUser({
-      id: authStore.user.id,
-      firstName: authStore.user.firstName,
-      lastName: authStore.user.lastName,
-      email: authStore.user.email
-    })
+    // Vérifier si des fichiers ont été sélectionnés
+    const files = fileInput.value?.files
+    if (files && files.length > 0 && !authStore.user.valid) {
+      await updateFile(files)
+    } else {
+      await authStore.updateUser({
+        id: authStore.user.id,
+        firstName: authStore.user.firstName,
+        lastName: authStore.user.lastName,
+        email: authStore.user.email,
+        birthDate: authStore.user.birthDate
+      })
+    }
 
     showToast.value = true
     setTimeout(() => {
@@ -173,10 +221,64 @@ const handleUpdate = async () => {
   }
 }
 
+const updateFile = async (files) => {
+  const formData = new FormData()
+  formData.append('firstName', authStore.user.firstName)
+  formData.append('lastName', authStore.user.lastName)
+  formData.append('birthDate', authStore.user.birthDate)
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i])
+  }
+  await authStore.completeFile(authStore.user.id, formData)
+}
+
 // Charge les médicaments au montage
 onMounted(() => {
   orderStore.user_orders()
+  authStore.one_user(authStore.user.id)
 })
+
+// Vérifie si toutes les infos sont remplies
+const isProfileComplete = () => {
+  const user = authStore.user
+  return user.firstName && user.lastName && user.email && user.birthDate && user.urls.length
+}
+
+// Empêche de quitter la page si profil incomplet ou non validé
+router.beforeEach((to, from, next) => {
+  if (
+    from.name === 'Profil' &&
+    (!isProfileComplete() || !authStore.user.valid) &&
+    to.name !== 'Profil'
+  ) {
+    // Affiche un message ou toast si besoin
+    if (!authStore.user.valid) {
+      showProfilToast.value = true
+      setTimeout(() => {
+        showProfilToast.value = false
+      }, 3000)
+    } else {
+      showProfilToast.value = true
+      setTimeout(() => {
+        showProfilToast.value = false
+      }, 2000)
+    }
+    next(false)
+  } else {
+    next()
+  }
+})
+
+// Surveille les changements de profil pour forcer l'utilisateur à rester
+watch(
+  () => authStore.user,
+  () => {
+    if (!isProfileComplete() && activeTab.value !== 'personal') {
+      activeTab.value = 'personal'
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style lang="scss" scoped>
@@ -484,11 +586,15 @@ onMounted(() => {
   left: 32px;
   background: #38a169;
   color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 24px 40px;
+  border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 9999;
   animation: fadeInOut 2.5s ease-in-out;
+
+  &.error {
+    background: red;
+  }
 }
 
 @keyframes fadeInOut {

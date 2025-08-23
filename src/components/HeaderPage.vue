@@ -114,11 +114,11 @@
           </p>
 
           <form class="login-form" @submit.prevent="handleRegister">
-            <label>Nom</label>
+            <!-- <label>Nom</label>
             <input v-model="lastName" required />
 
             <label>Prénom</label>
-            <input v-model="firstName" required />
+            <input v-model="firstName" required /> -->
 
             <label>Email</label>
             <input type="email" v-model="email" required />
@@ -154,8 +154,8 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 
 const showRegisterPopup = ref(false)
-const firstName = ref('')
-const lastName = ref('')
+// const firstName = ref('')
+// const lastName = ref('')
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -174,6 +174,7 @@ const handleLogin = async () => {
   try {
     await authStore.login(email.value, password.value)
     authStore.showLoginPopup = false
+    if (!authStore.user.valid) window.location.href = '/profil'
   } catch (error) {
     alert(error)
   }
@@ -183,8 +184,8 @@ const handleLogin = async () => {
 const handleRegister = async () => {
   try {
     await authStore.register({
-      firstName: firstName.value,
-      lastName: lastName.value,
+      // firstName: firstName.value,
+      // lastName: lastName.value,
       email: email.value,
       password: password.value
     })
